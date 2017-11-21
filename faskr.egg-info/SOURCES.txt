@@ -1,0 +1,9 @@
+MANIFEST.in
+faskr.egg-info/PKG-INFO
+faskr.egg-info/SOURCES.txt
+faskr.egg-info/dependency_links.txt
+faskr.egg-info/requires.txt
+faskr.egg-info/top_level.txt
+flaskr/__init__.py
+flaskr/flaskr.py
+flaskr/schema.sql
