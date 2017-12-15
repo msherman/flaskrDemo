@@ -25,11 +25,21 @@ def init_db():
 		db.cursor().executescript(f.read())
 	db.commit()
 	
+def init_user():
+	username="mike"
+	password="password"
+	email="mike@somewhere.blah"
+	db = get_db()
+	db.execute('insert into users (username, password, email) values (?,?,?)', [username, password, email])
+	db.commit()
+	print('Initialized user')
+	
 @app.cli.command('initdb')
 def initdb_command():
 	"""Initializes the database."""
 	init_db()
 	print('Initialized the database.')
+	init_user()
 	
 def get_db():
 	"""Opens a new database connection if there is
@@ -40,7 +50,7 @@ def get_db():
 	
 @app.teardown_appcontext
 def close_db(error):
-	"""Closes the datbase again at the end of the request."""
+	"""Closes the database again at the end of the request."""
 	if hasattr(g, 'sqlite_db'):
 		g.sqlite_db.close()
 		
@@ -66,15 +76,27 @@ def add_entry():
 def login():
 	error = None
 	if request.method == 'POST':
-		if request.form['username'] != app.config['USERNAME']:
+		go = check_Username(request.form['username'], request.form['password'])
+		if go == 0:
 			error = 'Invalid username'
-		elif request.form['password'] != app.config['PASSWORD']:
+		elif go == 1:
 			error = 'Invalid password'
 		else:
 			session['logged_in'] = True
 			flash('You were logged in')
 			return redirect(url_for('show_entries'))
 	return render_template('login.html', error=error)
+	
+def check_Username(username, password):
+	db = get_db()
+	cur = db.execute('select password from users where username=?', [username])
+	userCheck = cur.fetchall()
+	if userCheck == []:
+		return 0
+	print userCheck[0][0]
+	if userCheck[0][0] != password:
+		return 1
+	return 2
 	
 @app.route('/logout')
 def logout():
